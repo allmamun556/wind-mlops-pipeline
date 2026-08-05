@@ -1,0 +1,157 @@
+.page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 3rem;
+}
+
+.hero h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.4rem;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.error-card {
+  margin-top: 2rem;
+}
+
+.error-text {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.75rem;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.1rem 1.5rem;
+  margin: 1.25rem 0 1.5rem;
+}
+
+@media (max-width: 560px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.field-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field input[type="range"] {
+  accent-color: var(--accent);
+  width: 100%;
+}
+
+.field select {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+button[type="submit"] {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.result-card {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.prediction-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0.5rem 0;
+}
+
+.prediction-unit {
+  font-size: 1.1rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+}
+
+.metrics-table td {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.metrics-table td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.footer {
+  margin-top: 2.5rem;
+  text-align: center;
+}

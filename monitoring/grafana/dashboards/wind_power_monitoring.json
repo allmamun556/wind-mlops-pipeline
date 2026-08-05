@@ -1,0 +1,133 @@
+{
+  "title": "Wind Power Prediction — Model Monitoring",
+  "uid": "wind-power-monitoring",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Dataset Drift",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "dataset_drift_detected", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "OK", "color": "green" } } },
+            { "type": "value", "options": { "1": { "text": "DRIFT DETECTED", "color": "red" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }, { "value": 1, "color": "red" }] }
+        }
+      },
+      "options": { "textMode": "value", "colorMode": "background", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 2,
+      "type": "gauge",
+      "title": "Drift Share",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "data_drift_share", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }, { "value": 0.5, "color": "red" }] }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Model R²",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "model_metric{metric=\"R2\"}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "decimals": 4, "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "blue" }] } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Model MAE",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "model_metric{metric=\"MAE\"}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "kwatt", "decimals": 2, "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "blue" }] } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Model RMSE",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "model_metric{metric=\"RMSE\"}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "kwatt", "decimals": 2, "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "blue" }] } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Last Prediction",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "last_predicted_power_kw", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "kwatt", "decimals": 1, "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }] } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 7,
+      "type": "bargauge",
+      "title": "Per-Column Drift Score (Evidently AI)",
+      "description": "Drift score per monitored SCADA column from the latest `dvc repro` run's Evidently report. Higher = more drifted.",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "column_drift_score", "legendFormat": "{{column}}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "decimals": 3, "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }, { "value": 0.1, "color": "orange" }, { "value": 0.3, "color": "red" }] } } },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Predicted Power Output",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "last_predicted_power_kw", "legendFormat": "predicted kW", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "kwatt" } }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Prediction Request Rate",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(prediction_requests_total[5m])", "legendFormat": "predictions/sec", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "API Latency (p95 by endpoint)",
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path))", "legendFormat": "{{path}}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "HTTP Request Rate by Endpoint",
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(rate(http_requests_total[5m])) by (path, status)", "legendFormat": "{{path}} [{{status}}]", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    }
+  ]
+}

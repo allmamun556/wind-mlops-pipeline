@@ -6,6 +6,7 @@ __pycache__/
 mlartifacts/
 *.egg-info/
 .DS_Store
+venv/
 
 # Large raw data is DVC-tracked, not committed directly to git history
 # (uncomment once a DVC remote is configured):

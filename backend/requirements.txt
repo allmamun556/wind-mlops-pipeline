@@ -1,0 +1,10 @@
+# Lean production serving image — only what's needed to load the model
+# and serve predictions, not the full training/DVC/MLflow/Evidently stack.
+fastapi==0.141.1
+uvicorn[standard]==0.52.1
+pydantic==2.13.4
+joblib==1.5.3
+prometheus-client==0.26.0
+pandas==2.3.3
+numpy==2.4.4
+scikit-learn==1.8.0

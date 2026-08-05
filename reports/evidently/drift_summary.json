@@ -4,20 +4,20 @@
   "drift_share": 0.8666666666666667,
   "dataset_drift_detected": true,
   "per_column_drift_score": {
-    "ActivePower": 0.5518564654164748,
+    "ActivePower": 0.5518564654164749,
     "AmbientTemperature": 2.8112051783380707,
     "BearingShaftTemperature": 0.6202161877102245,
-    "Blade1PitchAngle": 0.21764965213510162,
-    "ControlBoxTemperature": 1.1298420283206452,
+    "Blade1PitchAngle": 0.2176496521351016,
+    "ControlBoxTemperature": 1.1298420283206456,
     "GearboxOilTemperature": 0.6814320438824167,
-    "GeneratorRPM": 0.6545809488342833,
+    "GeneratorRPM": 0.6545809488342836,
     "GeneratorWinding1Temperature": 0.4854772393100171,
-    "HubTemperature": 1.4491414606635116,
-    "MainBoxTemperature": 1.3166394754268786,
-    "NacellePosition": 0.042862804799808196,
+    "HubTemperature": 1.4491414606635127,
+    "MainBoxTemperature": 1.3166394754268784,
+    "NacellePosition": 0.04286280479980819,
     "ReactivePower": 0.5514089838737823,
     "TurbineStatus": 0.1629923829348444,
-    "WindDirection": 0.04915753392772065,
-    "WindSpeed": 0.9606644180238187
+    "WindDirection": 0.04915753392772067,
+    "WindSpeed": 0.9606644180238185
   }
 }
