@@ -1,0 +1,16 @@
+[
+  "AmbientTemperature",
+  "BearingShaftTemperature",
+  "Blade1PitchAngle",
+  "ControlBoxTemperature",
+  "GearboxOilTemperature",
+  "GeneratorRPM",
+  "GeneratorWinding1Temperature",
+  "HubTemperature",
+  "MainBoxTemperature",
+  "NacellePosition",
+  "ReactivePower",
+  "TurbineStatus",
+  "WindDirection",
+  "WindSpeed"
+]

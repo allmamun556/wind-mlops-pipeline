@@ -17,7 +17,8 @@ stages:
       - data/processed/test.csv
       - data/monitoring/reference.csv
       - data/monitoring/current.csv
-      - models/feature_list.json
+      - models/feature_list.json:
+          cache: false
       - reports/figures/correlation_before.png
       - reports/figures/correlation_after.png
 
@@ -29,7 +30,8 @@ stages:
       - data/processed/train.csv
       - data/processed/test.csv
     outs:
-      - models/best_model.pkl
+      - models/best_model.pkl:
+          cache: false
     metrics:
       - reports/model_comparison.csv:
           cache: false
