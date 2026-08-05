@@ -51,12 +51,18 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Configure DVC remote auth (DagsHub)
+        if: ${{ secrets.DAGSHUB_TOKEN != '' }}
+        run: |
+          dvc remote modify origin --local auth basic
+          dvc remote modify origin --local user "${{ secrets.DAGSHUB_USERNAME }}"
+          dvc remote modify origin --local password "${{ secrets.DAGSHUB_TOKEN }}"
       - name: Pull versioned data (DVC)
-        run: dvc pull || echo "No remote configured yet — using data checked into the workspace"
+        run: dvc pull || echo "Remote unreachable or empty — using data checked into the workspace"
       - name: Reproduce pipeline (data → preprocessing → train → monitor)
         run: dvc repro
       - name: Push updated data/model versions (DVC)
-        run: dvc push || echo "No remote configured yet — skipping push"
+        run: dvc push || echo "DVC push failed — check DagsHub remote auth"
       - name: Gate on data drift
         id: drift_gate
         run: |
