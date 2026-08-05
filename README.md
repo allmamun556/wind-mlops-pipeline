@@ -43,27 +43,26 @@ Adapted from the thesis's Google MLOps → open-source-tools mapping
 | Prometheus + Grafana | Live model monitoring dashboard | `backend/metrics.py`, `monitoring/` |
 | Streamlit | Model serving UI (thesis-original) | `app.py` |
 | FastAPI + React | Production serving API + SPA | `backend/`, `frontend/` |
-| Docker / Hugging Face Spaces | Deployment target | `Dockerfile`, deploy job in `ci-cd.yml` |
+| Docker / Render | Deployment target | `Dockerfile`, deploy job in `ci-cd.yml` |
 
 ## What's real vs. what you'd swap in for production
 
-This is a **portfolio/demo implementation**, built and run in a sandboxed
-environment without your ENERTRAG credentials or a live GitHub/Hugging Face
-account, so a few things are stand-ins by design:
+This is a **portfolio/demo implementation** built without ENERTRAG
+credentials, so a few things are stand-ins by design:
 
 - **Data**: synthetic SCADA data (`src/data_generation.py`) that reproduces
   the thesis's feature set, correlation structure, missing-value rates, and
   a deliberately-injected drift segment — so the drift detector has
   something genuine to catch. Swap in real ENERTRAG SCADA exports (or the
-  Kaggle/Enerjisa datasets you've used in other notebooks) by pointing
+  Kaggle/Enerjisa datasets used in other notebooks) by pointing
   `config.RAW_DATA_PATH` at a CSV with the same column names; nothing else
   needs to change.
 - **MLflow / DVC backends**: local SQLite + local filesystem (`mlflow.db`,
   `.dvc/`). For a team setting, point `MLFLOW_TRACKING_URI` at a hosted
   MLflow server and add a DVC remote (`dvc remote add -d storage s3://...`).
-- **Deploy step**: the GitHub Actions `deploy` job is fully written but
-  needs `HF_TOKEN` / `HF_SPACE` secrets in your own GitHub repo to actually
-  push — I don't have those credentials.
+- **Deploy step**: the GitHub Actions `deploy` job pushes to Render via a
+  deploy hook — set the `RENDER_DEPLOY_HOOK` secret in the GitHub repo to
+  enable it (see Render's dashboard → service → Settings → Deploy Hook).
 
 ## Results (this run)
 
@@ -258,10 +257,10 @@ the dashboard in real time.
 ## Future work (extending the thesis's own "Future Work" chapter)
 
 - Swap in real ENERTRAG turbine SCADA exports and retrain.
-- Add CNN/RNN/LSTM sequence models (skipped here to keep the sandbox build
-  fast — sklearn/statsmodels only); thesis reports LSTM at R²≈0.90, below
-  the tree ensembles, so the expected uplift is limited for this feature set.
+- Add CNN/RNN/LSTM sequence models (skipped here to keep the build fast —
+  sklearn/statsmodels only); thesis reports LSTM at R²≈0.90, below the tree
+  ensembles, so the expected uplift is limited for this feature set.
 - Point DVC/MLflow at shared remotes (S3/Azure Blob + hosted MLflow) for
   team use instead of local SQLite/filesystem.
-- Wire the GitHub Actions `deploy` job to a real Hugging Face Space with
-  `HF_TOKEN`/`HF_SPACE` secrets.
+- `RENDER_DEPLOY_HOOK` is wired up in the GitHub Actions `deploy` job —
+  set it as a repo secret once the Render service exists.

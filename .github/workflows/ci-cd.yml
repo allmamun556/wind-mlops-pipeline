@@ -73,26 +73,11 @@ jobs:
             mlflow.db
 
   deploy:
-    name: Deploy Streamlit app to Hugging Face Hub
+    name: Deploy Streamlit app to Render
     needs: pipeline
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
-      - name: Download pipeline artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: pipeline-reports
-      - name: Push to Hugging Face Space
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      - name: Trigger Render deploy
         run: |
-          git rm --cached data/raw/turbine_data.csv 2>/dev/null || true
-          echo "data/raw/turbine_data.csv" >> .gitignore
-          git config user.email "actions@github.com"
-          git config user.name "github-actions"
-          git add .gitignore && git commit -m "Exclude large raw data from HF push" || true
-          git push --force https://user:$HF_TOKEN@huggingface.co/spaces/${{ secrets.HF_SPACE }} main
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
