@@ -44,7 +44,7 @@ IMPUTATION_STRATEGY = {
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 
-MLFLOW_TRACKING_URI = os.environ.get("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")
+MLFLOW_TRACKING_URI = os.environ.get("MLFLOW_TRACKING_URI") or "sqlite:///mlflow.db"
 MLFLOW_EXPERIMENT_NAME = "wind-power-prediction"
 MODEL_REGISTRY_NAME = "wind_power_predictor"
 

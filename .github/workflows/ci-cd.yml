@@ -35,6 +35,13 @@ jobs:
     name: Data → Train → Monitor (DVC pipeline)
     needs: test
     runs-on: ubuntu-latest
+    env:
+      # Points MLflow tracking at the hosted DagsHub server instead of the
+      # local sqlite file — leave these repo secrets unset to fall back to
+      # local sqlite:///mlflow.db (see src/config.py).
+      MLFLOW_TRACKING_URI: ${{ secrets.DAGSHUB_MLFLOW_TRACKING_URI }}
+      MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
+      MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:

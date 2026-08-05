@@ -1,14 +1,21 @@
 # Multi-stage build: compile the Vite/React app, then serve the static
-# bundle with Nginx (also reverse-proxies /api to the FastAPI backend so
-# the frontend can be built without baking a backend hostname into the JS).
+# bundle with Nginx.
+#
+# VITE_API_URL is a build ARG (not hardcoded) so this same Dockerfile works
+# two ways:
+#   - docker-compose (local/production-stack): defaults to same-origin
+#     "/api", which nginx.conf reverse-proxies to the "backend" service.
+#   - standalone Render deploy: set the VITE_API_URL environment variable
+#     in Render's dashboard to the backend service's public URL (Render
+#     auto-passes dashboard env vars as build args of the same name) and
+#     the frontend calls it directly over CORS instead of a proxy.
 FROM node:20-slim AS build
 WORKDIR /app
 COPY package.json ./
 RUN npm install
 COPY . .
-# Same-origin /api path — see nginx.conf — so no backend URL needs to be
-# known at build time.
-ENV VITE_API_URL=/api
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
 FROM nginx:1.27-alpine
