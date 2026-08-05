@@ -1,4 +1,20 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=wind
+      - POSTGRES_PASSWORD=wind
+      - POSTGRES_DB=wind_mlops
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wind -d wind_mlops"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build:
       context: .
@@ -46,5 +62,6 @@ services:
       - prometheus
 
 volumes:
+  postgres-data:
   prometheus-data:
   grafana-data:

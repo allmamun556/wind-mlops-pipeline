@@ -63,7 +63,9 @@ jobs:
       - name: Pull versioned data (DVC)
         run: dvc pull || echo "Remote unreachable or empty — using data checked into the workspace"
       - name: Reproduce pipeline (data → preprocessing → train → monitor)
-        run: dvc repro
+        # Explicit stage list (excludes `etl`, which needs a live Postgres
+        # this runner doesn't have — see dvc.yaml's comment on that stage).
+        run: dvc repro data_generation preprocessing train monitor
       - name: Push updated data/model versions (DVC)
         run: dvc push || echo "DVC push failed — check DagsHub remote auth"
       - name: Gate on data drift

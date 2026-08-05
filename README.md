@@ -111,6 +111,11 @@ wind-mlops-pipeline/
 ├── src/
 │   ├── config.py          # column lists, paths, hyperparameters
 │   ├── data_generation.py # synthetic SCADA data (swap for real data)
+│   ├── etl/                # real weather ETL: Open-Meteo -> Postgres -> CSV
+│   │   ├── extract.py       # 2 real sources: historical + forecast API
+│   │   ├── transform.py     # derives turbine schema from real weather
+│   │   ├── load.py          # upserts into Postgres
+│   │   └── run_etl.py       # CLI entrypoint (dvc repro etl)
 │   ├── preprocessing.py   # correlation pruning + imputation
 │   ├── train.py           # 9-model MLflow-tracked training + registry
 │   └── monitor.py         # Evidently AI drift/stability reports
@@ -128,7 +133,7 @@ wind-mlops-pipeline/
 │   └── grafana/
 │       ├── provisioning/               # auto-wired datasource + dashboard
 │       └── dashboards/wind_power_monitoring.json
-├── docker-compose.yml      # backend + frontend + prometheus + grafana
+├── docker-compose.yml      # postgres + backend + frontend + prometheus + grafana
 ├── dvc.yaml / dvc.lock    # reproducible pipeline definition
 ├── .github/workflows/
 │   ├── ci-cd.yml           # test → dvc repro → drift gate → deploy
@@ -161,6 +166,46 @@ streamlit run app.py                                 # http://localhost:8501
 # Run tests (same as CI)
 pytest tests/ -v
 ```
+
+## ETL: real weather ingestion -> Postgres
+
+A second, opt-in data source alongside the synthetic generator — a real
+extract/transform/load pipeline pulling genuine weather data instead of
+simulated inputs:
+
+- **Extract** (`src/etl/extract.py`): two distinct real sources, both free
+  and keyless — [Open-Meteo](https://open-meteo.com)'s Historical Weather
+  API (hourly data back to 1940, used for backfill) and its Forecast API
+  (current/near-term conditions, simulating incremental live ingestion).
+- **Transform** (`src/etl/transform.py`): merges the real wind speed,
+  wind direction, and ambient temperature into the same 22-column turbine
+  schema `data_generation.py` produces. Turbine-internal sensor readings
+  (bearing/generator/gearbox temperatures, RPM, pitch angles) are derived
+  from the real wind speed using the same physics-based relationships as
+  the synthetic generator — no public API exposes real turbine-internal
+  telemetry, so those stay derived rather than fabricated as "real."
+- **Load** (`src/etl/load.py`): upserts into Postgres — a
+  `raw_weather_observations` staging table (one row per source/location/
+  timestamp, for auditability) and a `turbine_readings` table (the final,
+  transformed data). Idempotent — re-running doesn't duplicate rows.
+
+The pipeline also writes a CSV snapshot (`data/raw/turbine_data_etl.csv`)
+in the exact schema `preprocessing.py` expects — verified to run through
+the existing pipeline with zero code changes.
+
+**Run it:**
+```bash
+docker compose up -d postgres              # local Postgres (see docker-compose.yml)
+export DATABASE_URL=postgresql://wind:wind@localhost:5432/wind_mlops
+dvc repro etl                              # or: python src/etl/run_etl.py --backfill-days 730
+```
+
+This is a separate, explicit DVC stage — **not** a dependency of
+`preprocessing`, so the default `dvc repro` (what CI runs) is completely
+unaffected and doesn't need a live Postgres. To make this the pipeline's
+primary data source instead of synthetic data, point `preprocessing`'s
+`dvc.yaml` dependency at `data/raw/turbine_data_etl.csv` (and
+`config.RAW_DATA_PATH`) once you're ready to commit to it.
 
 ## Production serving: FastAPI + React
 
