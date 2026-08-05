@@ -52,7 +52,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Configure DVC remote auth (DagsHub)
-        if: ${{ secrets.DAGSHUB_TOKEN != '' }}
+        # Steps can't reference the `secrets` context directly in `if:`
+        # (GitHub Actions rejects it as invalid) — reuse the job-level env
+        # var above, which is the same secret value, instead.
+        if: ${{ env.MLFLOW_TRACKING_PASSWORD != '' }}
         run: |
           dvc remote modify origin --local auth basic
           dvc remote modify origin --local user "${{ secrets.DAGSHUB_USERNAME }}"
