@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.streamlit/
+mlartifacts/
+*.egg-info/
+.DS_Store
+
+# Large raw data is DVC-tracked, not committed directly to git history
+# (uncomment once a DVC remote is configured):
+# data/raw/turbine_data.csv

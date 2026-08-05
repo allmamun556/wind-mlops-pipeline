@@ -1,0 +1,49 @@
+stages:
+  data_generation:
+    cmd: python src/data_generation.py --rows 40000 --seed 42 --out data/raw/turbine_data.csv
+    deps:
+      - src/data_generation.py
+    outs:
+      - data/raw/turbine_data.csv
+
+  preprocessing:
+    cmd: python src/preprocessing.py
+    deps:
+      - src/preprocessing.py
+      - src/config.py
+      - data/raw/turbine_data.csv
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - data/monitoring/reference.csv
+      - data/monitoring/current.csv
+      - models/feature_list.json
+      - reports/figures/correlation_before.png
+      - reports/figures/correlation_after.png
+
+  train:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - src/config.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+    outs:
+      - models/best_model.pkl
+    metrics:
+      - reports/model_comparison.csv:
+          cache: false
+
+  monitor:
+    cmd: python src/monitor.py
+    deps:
+      - src/monitor.py
+      - src/config.py
+      - data/monitoring/reference.csv
+      - data/monitoring/current.csv
+    outs:
+      - reports/evidently/data_drift_report.html
+      - reports/evidently/data_stability_report.html
+    metrics:
+      - reports/evidently/drift_summary.json:
+          cache: false

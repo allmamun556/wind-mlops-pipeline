@@ -1,0 +1,98 @@
+name: ML-CI/CD — Wind Power Prediction Pipeline
+
+# Mirrors thesis Section 4.2.4 / 5.3.2.2: GitHub Actions automates testing,
+# training, drift-gated validation, and deployment on every push / PR to
+# main, or manually via workflow_dispatch.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Nightly retrain, matching Chapter 4's "trigger" node in the automated
+    # pipeline (batch fetching -> retrain -> re-validate).
+    - cron: "0 3 * * *"
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m pytest tests/ -v
+
+  pipeline:
+    name: Data → Train → Monitor (DVC pipeline)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Pull versioned data (DVC)
+        run: dvc pull || echo "No remote configured yet — using data checked into the workspace"
+      - name: Reproduce pipeline (data → preprocessing → train → monitor)
+        run: dvc repro
+      - name: Push updated data/model versions (DVC)
+        run: dvc push || echo "No remote configured yet — skipping push"
+      - name: Gate on data drift
+        id: drift_gate
+        run: |
+          python - <<'PY'
+          import json, sys
+          summary = json.load(open("reports/evidently/drift_summary.json"))
+          share = summary["drift_share"]
+          print(f"Drift share: {share:.1%}")
+          # Non-blocking by default: flag loudly but let CML/reviewers decide.
+          # Flip to `sys.exit(1)` to hard-block deploys on severe drift.
+          if share > 0.5:
+              print("::warning::Significant data drift detected — recommend retraining before deploy")
+          PY
+      - name: Upload experiment & monitoring artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-reports
+          path: |
+            reports/
+            models/best_model.pkl
+            mlflow.db
+
+  deploy:
+    name: Deploy Streamlit app to Hugging Face Hub
+    needs: pipeline
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Download pipeline artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: pipeline-reports
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git rm --cached data/raw/turbine_data.csv 2>/dev/null || true
+          echo "data/raw/turbine_data.csv" >> .gitignore
+          git config user.email "actions@github.com"
+          git config user.name "github-actions"
+          git add .gitignore && git commit -m "Exclude large raw data from HF push" || true
+          git push --force https://user:$HF_TOKEN@huggingface.co/spaces/${{ secrets.HF_SPACE }} main

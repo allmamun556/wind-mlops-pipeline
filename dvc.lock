@@ -1,0 +1,119 @@
+schema: '2.0'
+stages:
+  data_generation:
+    cmd: python src/data_generation.py --rows 40000 --seed 42 --out 
+      data/raw/turbine_data.csv
+    deps:
+    - path: src/data_generation.py
+      hash: md5
+      md5: cb539a4515b24ffa2fa13a9a8fafbce0
+      size: 6720
+    outs:
+    - path: data/raw/turbine_data.csv
+      hash: md5
+      md5: 98520d4cf888696e171e95691811cdd5
+      size: 14773996
+  preprocessing:
+    cmd: python src/preprocessing.py
+    deps:
+    - path: data/raw/turbine_data.csv
+      hash: md5
+      md5: 98520d4cf888696e171e95691811cdd5
+      size: 14773996
+    - path: src/config.py
+      hash: md5
+      md5: 0000909810a27f5484a742fc371e96c0
+      size: 1891
+    - path: src/preprocessing.py
+      hash: md5
+      md5: 5846addeb704ee5ab5341ee22e7ad07c
+      size: 3656
+    outs:
+    - path: data/monitoring/current.csv
+      hash: md5
+      md5: d039fe32c8a4c61204008cc22e6ee5fd
+      size: 1712178
+    - path: data/monitoring/reference.csv
+      hash: md5
+      md5: 50b0e1830199d95444db5fc00d92206c
+      size: 9766203
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 33417187fbc8cd2e90126beb1448be6e
+      size: 2295605
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 750d904aec77a877ffcb4e7bc35e625b
+      size: 9182776
+    - path: models/feature_list.json
+      hash: md5
+      md5: dc24b86edb0c420fcf9b697a3ab3a6f8
+      size: 320
+    - path: reports/figures/correlation_after.png
+      hash: md5
+      md5: aa97df9c8c2d5fa9cb8f4df5747fe539
+      size: 246041
+    - path: reports/figures/correlation_before.png
+      hash: md5
+      md5: 3695cb41b42b39d2d39401d22f0d926c
+      size: 340876
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 33417187fbc8cd2e90126beb1448be6e
+      size: 2295605
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 750d904aec77a877ffcb4e7bc35e625b
+      size: 9182776
+    - path: src/config.py
+      hash: md5
+      md5: 0000909810a27f5484a742fc371e96c0
+      size: 1891
+    - path: src/train.py
+      hash: md5
+      md5: 08fd9f4f71b383fdaecdb335c59c0455
+      size: 9073
+    outs:
+    - path: models/best_model.pkl
+      hash: md5
+      md5: 36785e03d4b07cbfd6e5cefc8d2aa444
+      size: 7027323
+    - path: reports/model_comparison.csv
+      hash: md5
+      md5: e1b564f90774ffb8870d23d19149b96f
+      size: 822
+  monitor:
+    cmd: python src/monitor.py
+    deps:
+    - path: data/monitoring/current.csv
+      hash: md5
+      md5: d039fe32c8a4c61204008cc22e6ee5fd
+      size: 1712178
+    - path: data/monitoring/reference.csv
+      hash: md5
+      md5: 50b0e1830199d95444db5fc00d92206c
+      size: 9766203
+    - path: src/config.py
+      hash: md5
+      md5: 0000909810a27f5484a742fc371e96c0
+      size: 1891
+    - path: src/monitor.py
+      hash: md5
+      md5: 378743b8088c7263467187e5001e54ee
+      size: 4499
+    outs:
+    - path: reports/evidently/data_drift_report.html
+      hash: md5
+      md5: f0127c0fe4ef11f581a33b3cc2890703
+      size: 4715720
+    - path: reports/evidently/data_stability_report.html
+      hash: md5
+      md5: 89f3f06f905c8281093e44bbb1761340
+      size: 3840730
+    - path: reports/evidently/drift_summary.json
+      hash: md5
+      md5: 4cd1a0dc4ce68cb4388d1c8faa0115e1
+      size: 822

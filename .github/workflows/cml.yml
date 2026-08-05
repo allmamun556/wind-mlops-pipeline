@@ -1,0 +1,51 @@
+name: CML — Automated Model Performance Report
+
+# Mirrors thesis Section 5.3.2.6: posts model comparison metrics and drift
+# summary as a comment on the pull request, so reviewers see the latest
+# numbers without leaving GitHub (thesis Figure 5.16).
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: iterative/setup-cml@v2
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Reproduce pipeline
+        run: dvc repro
+      - name: Build CML report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Model Performance Report" > report.md
+          echo "" >> report.md
+          echo "### Model comparison (sorted by R²)" >> report.md
+          python - <<'PY' >> report.md
+          import pandas as pd
+          df = pd.read_csv("reports/model_comparison.csv", index_col=0)
+          print(df.round(4).to_markdown())
+          PY
+          echo "" >> report.md
+          echo "### Data drift summary" >> report.md
+          python - <<'PY' >> report.md
+          import json
+          s = json.load(open("reports/evidently/drift_summary.json"))
+          print(f"- Drifted columns: **{s['n_drifted_columns']}/{s['n_columns']}** "
+                f"({s['drift_share']:.1%})")
+          print(f"- Dataset drift detected: **{s['dataset_drift_detected']}**")
+          PY
+          cml comment create report.md
