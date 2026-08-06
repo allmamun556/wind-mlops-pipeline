@@ -4,6 +4,10 @@ __pycache__/
 .ipynb_checkpoints/
 .streamlit/
 mlartifacts/
+# MLflow local run/artifact store — not a DVC output, grows unbounded with
+# every retrain (one full model copy per run). mlflow.db keeps run metadata;
+# the served model is models/best_model.pkl, tracked separately.
+mlruns/
 *.egg-info/
 .DS_Store
 venv/
