@@ -4,9 +4,60 @@
   padding: 2.5rem 1.5rem 3rem;
 }
 
-.hero h1 {
-  font-size: 1.75rem;
-  margin: 0 0 0.4rem;
+.site-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.site-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.brand span {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.brand h1 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.site-tagline {
+  margin: 0.85rem 0 0;
+}
+
+.dashboard-nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-nav a {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.dashboard-nav a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .muted {
@@ -134,6 +185,25 @@ button[type="submit"]:disabled {
   font-weight: 500;
 }
 
+.headline-metric {
+  margin: 1.1rem 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.headline-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+
+.headline-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
 .metrics-table {
   width: 100%;
   border-collapse: collapse;
@@ -149,6 +219,60 @@ button[type="submit"]:disabled {
 .metrics-table td:last-child {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+.about-card {
+  margin-top: 1.5rem;
+}
+
+.pipeline-steps {
+  list-style: none;
+  counter-reset: step;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 1.25rem 0;
+  padding: 0;
+}
+
+@media (max-width: 760px) {
+  .pipeline-steps {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.pipeline-steps li {
+  counter-increment: step;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem;
+}
+
+.pipeline-steps li::before {
+  content: counter(step);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.pipeline-steps strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.pipeline-steps span {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 .footer {

@@ -48,3 +48,4 @@ jobs:
           print(f"- Dataset drift detected: **{s['dataset_drift_detected']}**")
           PY
           cml comment create report.md
+          cat report.md >> "$GITHUB_STEP_SUMMARY"

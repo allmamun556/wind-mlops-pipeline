@@ -3,9 +3,51 @@
   "uid": "wind-power-monitoring",
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 4,
   "refresh": "10s",
   "time": { "from": "now-1h", "to": "now" },
+  "links": [
+    {
+      "title": "Frontend App",
+      "tooltip": "React prediction UI",
+      "type": "link",
+      "icon": "external link",
+      "url": "http://localhost:8082",
+      "targetBlank": true
+    },
+    {
+      "title": "Prometheus",
+      "tooltip": "Raw metrics / PromQL",
+      "type": "link",
+      "icon": "external link",
+      "url": "http://localhost:9090",
+      "targetBlank": true
+    },
+    {
+      "title": "MLflow",
+      "tooltip": "Experiment tracking & model registry",
+      "type": "link",
+      "icon": "external link",
+      "url": "http://localhost:5000",
+      "targetBlank": true
+    },
+    {
+      "title": "GitHub Repo",
+      "tooltip": "Source code",
+      "type": "link",
+      "icon": "external link",
+      "url": "https://github.com/allmamun556/wind-mlops-pipeline",
+      "targetBlank": true
+    },
+    {
+      "title": "DagsHub",
+      "tooltip": "DVC data/model versioning + hosted MLflow",
+      "type": "link",
+      "icon": "external link",
+      "url": "https://dagshub.com/allmamun556/wind-mlops-pipeline",
+      "targetBlank": true
+    }
+  ],
   "panels": [
     {
       "id": 1,

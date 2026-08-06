@@ -1,5 +1,14 @@
 # Wind Power MLOps Pipeline
 
+[![ML-CI/CD](https://github.com/allmamun556/wind-mlops-pipeline/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/allmamun556/wind-mlops-pipeline/actions/workflows/ci-cd.yml)
+[![CML Report](https://github.com/allmamun556/wind-mlops-pipeline/actions/workflows/cml.yml/badge.svg)](https://github.com/allmamun556/wind-mlops-pipeline/actions/workflows/cml.yml)
+[![DVC](https://img.shields.io/badge/DVC-tracked-13ADC7?logo=dvc&logoColor=white)](https://dvc.org)
+[![DagsHub](https://img.shields.io/badge/DagsHub-Project-blue?logo=dagshub)](https://dagshub.com/allmamun556/wind-mlops-pipeline)
+[![MLflow](https://img.shields.io/badge/MLflow-tracked-0194E2?logo=mlflow&logoColor=white)](https://mlflow.org)
+[![Grafana](https://img.shields.io/badge/Grafana-dashboard-F46800?logo=grafana&logoColor=white)](https://grafana.com)
+[![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io)
+[![React](https://img.shields.io/badge/React-frontend-61DAFB?logo=react&logoColor=black)](https://react.dev)
+
 A working implementation of the MLOps pipeline designed in *"Modern ML-CI/CD,
 Experiment Tracking and Monitoring for Wind Power Prediction Data"*
 (A. A. Mamun, M.Sc. Thesis, BHT Berlin, 2024) — rebuilt end-to-end as a
@@ -63,6 +72,28 @@ credentials, so a few things are stand-ins by design:
 - **Deploy step**: the GitHub Actions `deploy` job pushes to Render via a
   deploy hook — set the `RENDER_DEPLOY_HOOK` secret in the GitHub repo to
   enable it (see Render's dashboard → service → Settings → Deploy Hook).
+
+## Where to see the automation run
+
+Everything below happens on every push to `main` (and nightly on a cron) —
+no need to dig through raw logs to see it:
+
+- **Unit tests** (`tests/test_pipeline.py`): the `test` job in
+  [`ci-cd.yml`](.github/workflows/ci-cd.yml) runs `pytest -v` and writes a
+  pass/fail summary to the run's **Summary** tab (Actions → pick a run →
+  top of the page), in addition to the full `-v` output in the job log.
+- **CI/CD pipeline status**: the badges at the top of this README link
+  straight to the [Actions tab](https://github.com/allmamun556/wind-mlops-pipeline/actions)
+  — green means the latest `dvc repro` (data → train → monitor) and drift
+  gate passed.
+- **CML model performance report**: [`cml.yml`](.github/workflows/cml.yml)
+  posts the 9-model comparison table + drift summary two places every
+  push — as a **comment on the commit** (see any commit's page on GitHub)
+  and on the workflow run's **Summary** tab, so it's visible without
+  opening a diff.
+- **Pipeline artifacts** (reports, best model, mlflow.db): uploaded by the
+  `pipeline` job as a downloadable build artifact on each run (Actions →
+  run → Artifacts section at the bottom).
 
 ## Results (this run)
 
@@ -232,6 +263,13 @@ as the CI drift gate), per-column drift scores, model R²/MAE/RMSE,
 live predicted power output, prediction request rate, and API latency —
 so making predictions through the React frontend at `:8082` visibly moves
 the dashboard in real time.
+
+**Cross-linking between dashboards**: the React frontend's header has nav
+links out to Grafana, Prometheus, and MLflow (`frontend/.env.example` —
+`VITE_GRAFANA_URL` / `VITE_PROMETHEUS_URL` / `VITE_MLFLOW_URL`, defaulting
+to their local ports; override for a standalone deploy), and the Grafana
+dashboard has links back to the frontend and Prometheus/MLflow via its
+`links` field — so you can jump between all four without retyping URLs.
 
 > Anonymous viewer access is enabled for convenience in this portfolio
 > demo (`GF_AUTH_ANONYMOUS_ENABLED=true` in `docker-compose.yml`) — turn
