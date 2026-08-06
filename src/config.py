@@ -50,14 +50,3 @@ MODEL_REGISTRY_NAME = "wind_power_predictor"
 
 BEST_MODEL_PATH = "models/best_model.pkl"
 FEATURE_LIST_PATH = "models/feature_list.json"
-
-# --- ETL: real weather ingestion -> Postgres --------------------------
-DATABASE_URL = os.environ.get("DATABASE_URL") or "postgresql://wind:wind@localhost:5432/wind_mlops"
-
-# Wind farm region stand-in (Mecklenburg-Vorpommern, NE Germany — a real
-# wind-heavy region, chosen since ENERTRAG's actual site coordinates
-# aren't public). Override via env vars for a different location.
-WEATHER_LAT = float(os.environ.get("WEATHER_LAT", "53.55"))
-WEATHER_LON = float(os.environ.get("WEATHER_LON", "13.27"))
-
-ETL_RAW_DATA_PATH = "data/raw/turbine_data_etl.csv"

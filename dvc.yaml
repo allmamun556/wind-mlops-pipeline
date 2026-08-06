@@ -1,22 +1,4 @@
 stages:
-  etl:
-    # Real weather ETL (Open-Meteo -> Postgres -> CSV) — a separate, opt-in
-    # entrypoint from the synthetic-data pipeline below. Run explicitly via
-    # `dvc repro etl`; deliberately NOT a dependency of `preprocessing`, so
-    # the default `dvc repro` (used by CI) is unaffected and doesn't
-    # require a live Postgres. Needs DATABASE_URL reachable (see
-    # docker-compose.yml's `postgres` service).
-    cmd: python src/etl/run_etl.py --backfill-days 730
-    always_changed: true
-    deps:
-      - src/etl/extract.py
-      - src/etl/transform.py
-      - src/etl/load.py
-      - src/etl/db.py
-      - src/etl/run_etl.py
-    outs:
-      - data/raw/turbine_data_etl.csv
-
   data_generation:
     cmd: python src/data_generation.py --rows 40000 --seed 42 --out data/raw/turbine_data.csv
     deps:

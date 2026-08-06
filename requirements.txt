@@ -5,11 +5,6 @@ scikit-learn==1.8.0
 statsmodels==0.14.6
 joblib==1.5.3
 
-# ETL: real weather data ingestion -> Postgres
-requests==2.32.5
-SQLAlchemy==2.0.44
-psycopg2-binary==2.9.11
-
 # Visualization
 matplotlib==3.10.8
 seaborn==0.13.2
