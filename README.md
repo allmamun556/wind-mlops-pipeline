@@ -27,18 +27,68 @@ drift.
 
 ## Architecture
 
-Adapted from the thesis's Google MLOps → open-source-tools mapping
-(Chapter 4, Figures 4.1–4.3):
+Phases ①–④ are adapted from the thesis's Google MLOps →
+open-source-tools mapping (Chapter 4, Figures 4.1–4.3). Phases ⑤–⑥ are
+the production serving + live monitoring stack layered on top — not part
+of the original thesis design, added here so "monitoring" is a live
+dashboard instead of static HTML reports:
 
+```mermaid
+flowchart LR
+    subgraph P1["① Data Ingestion &amp; Versioning"]
+        GEN["data_generation.py<br/>synthetic SCADA, seed=42"] --> RAW[("data/raw/*.csv")]
+        RAW --> LOCK["dvc.yaml / dvc.lock"]
+    end
+
+    subgraph P2["② Experimentation &amp; Training"]
+        PREP["preprocessing.py<br/>correlation pruning + imputation"] --> TRAIN["train.py<br/>9 models compared"]
+        TRAIN --> MODEL[("best_model.pkl")]
+        TRAIN -.->|"logs every run"| MLFLOW[("MLflow Tracking<br/>+ Model Registry")]
+    end
+
+    subgraph P3["③ CI/CD — GitHub Actions"]
+        TEST["pytest tests/"] --> REPRO["dvc repro"]
+        REPRO --> GATE{"drift share<br/>&gt; 50%?"}
+        GATE -->|"warn (non-blocking)"| DEPLOY["deploy job<br/>Render hook"]
+    end
+
+    subgraph P4["④ Monitoring &amp; Feedback"]
+        EVID["monitor.py<br/>Evidently AI"] --> DRIFT[("drift_summary.json<br/>+ HTML reports")]
+        DRIFT --> CML["CML report<br/>commit comment"]
+    end
+
+    subgraph P5["⑤ Model Serving"]
+        STREAMLIT["Streamlit app.py<br/>→ HF Space"]
+        BACKEND["FastAPI backend<br/>/predict /model-info"]
+        FRONTEND["React frontend<br/>prediction UI"]
+        BACKEND --> FRONTEND
+    end
+
+    subgraph P6["⑥ Live Monitoring"]
+        PROM[("Prometheus<br/>scrapes /metrics every 10s")]
+        GRAFANA["Grafana dashboard"]
+        PROM --> GRAFANA
+    end
+
+    LOCK --> PREP
+    LOCK <-->|"push / pull"| DAGSHUB[("DagsHub<br/>DVC remote + hosted MLflow")]
+    REPRO -.->|triggers| EVID
+    MODEL --> STREAMLIT
+    MODEL --> BACKEND
+    DEPLOY -.->|deploys| STREAMLIT
+    DEPLOY -.->|deploys| BACKEND
+    BACKEND -->|"serving metrics"| PROM
+    DRIFT -.->|"re-read on scrape"| PROM
+
+    FRONTEND ---|"nav links out to"| HUB{{"Grafana · Prometheus · MLflow<br/>GitHub · DagsHub"}}
+    GRAFANA ---|"links back to"| HUB
+
+    P1 ~~~ P2 ~~~ P3 ~~~ P4 ~~~ P5 ~~~ P6
 ```
- Data Ingestion/Versioning    Experimentation & Training     CI/CD & Model Serving        Monitoring & Feedback
- ┌────────────────────┐      ┌─────────────────────────┐    ┌───────────────────────┐    ┌────────────────────────┐
- │ Git + Git LFS + DVC │ ───► │ MLflow Tracking          │───►│ GitHub Actions (CI/CD)│───►│ Evidently AI            │
- │ data/raw/*.csv      │      │ 9 models compared        │    │ tests → dvc repro →   │    │ data drift + stability  │
- │ dvc.yaml pipeline   │      │ MLflow Model Registry    │    │ drift gate → deploy   │    │ report.md via CML       │
- └────────────────────┘      └─────────────────────────┘    │ Streamlit → HF Space  │    └────────────────────────┘
-                                                              └───────────────────────┘
-```
+
+See [Production serving](#production-serving-fastapi--react) and
+[Model monitoring](#model-monitoring-grafana--prometheus) below for the
+detail behind phases ⑤–⑥ (env vars, ports, what each panel shows).
 
 | Thesis tool | Role here | Where |
 |---|---|---|
@@ -233,7 +283,8 @@ Rather than opening static Evidently AI HTML reports by hand, model and
 drift monitoring is also available as a live dashboard app. Evidently AI
 still does the actual drift computation in `src/monitor.py` (unchanged —
 no reason to reimplement statistical drift detection); what's new is the
-presentation layer:
+presentation layer (see phases ⑤–⑥ of the
+[architecture diagram](#architecture) above for how this fits together):
 
 - **`backend/metrics.py`** exposes a Prometheus `/metrics` endpoint on
   the FastAPI backend with two kinds of signal:
@@ -265,11 +316,12 @@ so making predictions through the React frontend at `:8082` visibly moves
 the dashboard in real time.
 
 **Cross-linking between dashboards**: the React frontend's header has nav
-links out to Grafana, Prometheus, and MLflow (`frontend/.env.example` —
-`VITE_GRAFANA_URL` / `VITE_PROMETHEUS_URL` / `VITE_MLFLOW_URL`, defaulting
-to their local ports; override for a standalone deploy), and the Grafana
-dashboard has links back to the frontend and Prometheus/MLflow via its
-`links` field — so you can jump between all four without retyping URLs.
+links out to Grafana, Prometheus, MLflow, GitHub, and DagsHub
+(`frontend/.env.example` — `VITE_GRAFANA_URL` / `VITE_PROMETHEUS_URL` /
+`VITE_MLFLOW_URL`, defaulting to their local ports; override for a
+standalone deploy), and the Grafana dashboard has links back to the
+frontend, Prometheus, MLflow, GitHub, and DagsHub via its `links` field —
+so you can jump between all six without retyping URLs.
 
 > Anonymous viewer access is enabled for convenience in this portfolio
 > demo (`GF_AUTH_ANONYMOUS_ENABLED=true` in `docker-compose.yml`) — turn

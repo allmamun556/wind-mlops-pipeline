@@ -6,7 +6,7 @@ stages:
     deps:
     - path: src/data_generation.py
       hash: md5
-      md5: cb539a4515b24ffa2fa13a9a8fafbce0
+      md5: 86d6f4d830761a7657a54126f8e630b6
       size: 6720
     outs:
     - path: data/raw/turbine_data.csv

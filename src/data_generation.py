@@ -12,7 +12,7 @@ skipped -- the rest of the pipeline is dataset-agnostic as long as the
 column names in config.py are respected.
 
 Usage:
-    python src/data_generation.py --rows 40000 --seed 42 --out data/raw/turbine_data.csv
+    python src/data_generation.py --rows 30000 --seed 32 --out data/raw/turbine_data.csv
 """
 import argparse
 import numpy as np
@@ -126,8 +126,8 @@ def generate(n_rows: int, seed: int = 42, n_turbines: int = 5, drift_fraction: f
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate synthetic wind turbine SCADA data")
-    parser.add_argument("--rows", type=int, default=40000)
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--rows", type=int, default=30000)
+    parser.add_argument("--seed", type=int, default=32)
     parser.add_argument("--out", type=str, default="data/raw/turbine_data.csv")
     args = parser.parse_args()
 
