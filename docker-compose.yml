@@ -1,4 +1,13 @@
 services:
+  mlflow:
+    build:
+      context: ./monitoring/mlflow
+    volumes:
+      - ./mlflow.db:/mlflow/mlflow.db
+      - ./mlruns:/mlflow/mlruns
+    ports:
+      - "5000:5000"
+
   backend:
     build:
       context: .

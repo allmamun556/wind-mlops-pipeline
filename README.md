@@ -313,6 +313,8 @@ presentation layer (see phases ⑤–⑥ of the
 docker compose up --build
 # Dashboard: http://localhost:3001  (anonymous viewer access, no login)
 # Prometheus: http://localhost:9090
+# MLflow: http://localhost:5000 (reads the same mlflow.db / mlruns/ as a
+# local `mlflow ui` would -- see monitoring/mlflow/Dockerfile)
 ```
 
 The dashboard (`monitoring/grafana/dashboards/wind_power_monitoring.json`)
